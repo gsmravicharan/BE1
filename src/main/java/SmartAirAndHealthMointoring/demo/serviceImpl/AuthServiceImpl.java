@@ -11,10 +11,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @Service
@@ -89,25 +91,31 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public ResponseEntity<ResponseDto<?>> login(Map<String, String> user) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(user.get("username"),user.get("password"))
-        );
-
-        if(authentication.isAuthenticated())
-        {
-
-            String Token = jwtService.generateToken(user.get("username"));
-
-            return ResponseEntity.ok(
-                    ResponseDto.success(Token,"Login Successful..!")
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(user.get("username"), user.get("password"))
             );
-        }
-        else{
-            return ResponseEntity.badRequest().body(
-                    ResponseDto.error("Bad Request Wrong Credentials")
-            );
-        }
 
+            if (authentication.isAuthenticated()) {
+                User userEntity = userRepo.findByUsername(user.get("username"))
+                        .orElseThrow(() -> new RuntimeException("User not found"));
 
+                String token = jwtService.generateToken(user.get("username"));
+
+                // Data returned to the frontend
+                Map<String, Object> authData = new HashMap<>();
+                authData.put("token", token);
+                authData.put("role", userEntity.getRole().name());
+                authData.put("redgno", userEntity.getRedgno());
+
+                return ResponseEntity.ok(ResponseDto.success(authData, "Login Successful"));
+            } else {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(ResponseDto.error("Invalid Credentials"));
+            }
+        } catch (AuthenticationException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ResponseDto.error("Invalid Username or Password"));
+        }
     }
 }

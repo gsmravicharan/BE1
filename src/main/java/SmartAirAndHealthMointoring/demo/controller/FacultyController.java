@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/faculty")
+@CrossOrigin(origins = "http://localhost:5173")
 public class FacultyController {
 
     @Autowired
@@ -20,7 +21,7 @@ public class FacultyController {
         return "Faculty Details";
     }
 
-    @PostMapping("/dashboard/creation")
+    @PostMapping("/dashboard/create")
     public ResponseEntity<ResponseDto<?>> dashBoardCreation(@RequestBody TeacherDashBoard details)
     {
         return teacherDashBoardService.dashBoardcreation(details);
