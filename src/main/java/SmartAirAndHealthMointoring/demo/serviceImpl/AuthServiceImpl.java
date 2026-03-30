@@ -4,6 +4,7 @@ import SmartAirAndHealthMointoring.demo.Repository.UserRepo;
 import SmartAirAndHealthMointoring.demo.configuration.ResponseDto;
 import SmartAirAndHealthMointoring.demo.model.User;
 import SmartAirAndHealthMointoring.demo.service.AuthService;
+import SmartAirAndHealthMointoring.demo.service.EmailService;
 import SmartAirAndHealthMointoring.demo.service.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,6 +22,9 @@ import java.util.Map;
 public class AuthServiceImpl implements AuthService {
 
     @Autowired
+    EmailService emailService;
+
+    @Autowired
     JwtService jwtService;
 
     @Autowired
@@ -30,9 +34,52 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepo userRepo;
     private final PasswordEncoder passwordEncoder;
 
+
+
+
     public AuthServiceImpl(UserRepo userRepo, PasswordEncoder passwordEncoder) {
         this.userRepo = userRepo;
         this.passwordEncoder = passwordEncoder;
+    }
+
+
+    @Override
+    public ResponseEntity<ResponseDto<?>> sendOtp(String email) {
+        // 1. Basic Validation
+        if (!StringUtils.hasText(email)) {
+            return new ResponseEntity<>(ResponseDto.error("Email is required"), HttpStatus.BAD_REQUEST);
+        }
+
+        try {
+            // 2. Generate a 6-digit OTP
+            // (int)(Math.random() * 900000) + 100000 ensures it's always 6 digits
+            String otp = String.valueOf((int)(Math.random() * 900000) + 100000);
+
+            // 3. Prepare Email Content
+            String subject = "Verification Code - Smart Air Monitoring";
+            String message = "Hello,\n\nYour One-Time Password (OTP) for registration is: " + otp +
+                    "\n\nThis code will expire in 5 minutes. Do not share this with anyone.";
+
+            // 4. Send the Email
+            emailService.sendSimpleEmail(email, subject, message);
+
+            /**
+             * NOTE: Right now, the OTP is "lost" after sending because we haven't
+             * integrated Redis yet. Once we do, we will add:
+             * redisTemplate.opsForValue().set(email, otp, Duration.ofMinutes(5));
+             */
+
+            return ResponseEntity.ok(
+                    ResponseDto.success(null, "OTP sent successfully to " + email)
+            );
+
+        } catch (Exception e) {
+            // This catches SMTP errors (wrong password, connection issues, etc.)
+            return new ResponseEntity<>(
+                    ResponseDto.error("Failed to send OTP: " + e.getMessage()),
+                    HttpStatus.INTERNAL_SERVER_ERROR
+            );
+        }
     }
 
     @Override

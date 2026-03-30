@@ -11,4 +11,6 @@ public interface AuthService {
     ResponseEntity<ResponseDto<?>> register(User user);
 
     ResponseEntity<ResponseDto<?>> login(Map<String, String> user);
+
+    ResponseEntity<ResponseDto<?>> sendOtp(String email);
 }
