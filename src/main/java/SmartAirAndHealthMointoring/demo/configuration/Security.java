@@ -60,7 +60,6 @@ public class Security {
                         .requestMatchers("/api/vitals/**").hasAnyRole("STUDENT", "FACULTY", "ADMIN", "HOD")
                         .anyRequest().authenticated()
                 )
-                .httpBasic(Customizer.withDefaults())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
