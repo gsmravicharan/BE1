@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/vitals/")
+@CrossOrigin(origins = "http://localhost:5173")
 public class HealthVitalController {
 
     @Autowired

@@ -21,6 +21,7 @@ import org.springframework.util.StringUtils;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -43,9 +44,16 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public ResponseEntity<ResponseDto<?>> sendOtp(String email) {
+    public ResponseEntity<ResponseDto<?>> sendOtp(String email, boolean isLogin) {
         if (!StringUtils.hasText(email)) {
             return new ResponseEntity<>(ResponseDto.error("Email is required"), HttpStatus.BAD_REQUEST);
+        }
+
+        if (isLogin) {
+            Optional<User> user = userRepo.findByEmail(email);
+            if (user.isEmpty()) {
+                return new ResponseEntity<>(ResponseDto.error("Email Not Registered..!"), HttpStatus.BAD_REQUEST);
+            }
         }
 
         String otp = String.valueOf((int)(Math.random() * 900000) + 100000);
@@ -54,7 +62,11 @@ public class AuthServiceImpl implements AuthService {
         String subject = "Verification Code - Smart Air Monitoring";
         String message = "Your OTP is: " + otp + ". Valid for 5 minutes.";
 
-        emailService.sendSimpleEmail(email, subject, message);
+        try {
+            emailService.sendSimpleEmail(email, subject, message);
+        } catch (Exception e) {
+            return new ResponseEntity<>(ResponseDto.error("Failed to send email"), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
 
         return ResponseEntity.ok(ResponseDto.success(null, "OTP sent to " + email));
     }

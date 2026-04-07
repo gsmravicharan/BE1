@@ -5,7 +5,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "reports") // Matches your database table name
+@Table(name = "reports")
 @Data
 public class HealthVital {
 
@@ -14,16 +14,24 @@ public class HealthVital {
     private Integer id;
 
     private Integer air;
+
+    @Column(length = 50)
     private String status;
+
     private Integer bpm;
+
     private Float spo2;
+
     private Float temp;
+
+    @Column(length = 100)
+    private String email;
+
+    @Column(name = "registerno", length = 50)
+    private String registerno;
+    @Column(length = 100)
+    private String department;
 
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
-
-    private String email;
-
-    @Column(name = "registerno")
-    private String registerno;
 }

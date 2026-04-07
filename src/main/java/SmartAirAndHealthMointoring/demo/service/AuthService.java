@@ -9,5 +9,6 @@ import java.util.Map;
 public interface AuthService {
     ResponseEntity<ResponseDto<?>> register(User user, String otp);
     ResponseEntity<ResponseDto<?>> login(Map<String, String> user, String otp);
-    ResponseEntity<ResponseDto<?>> sendOtp(String email);
+
+    ResponseEntity<ResponseDto<?>> sendOtp(String email, boolean b);
 }

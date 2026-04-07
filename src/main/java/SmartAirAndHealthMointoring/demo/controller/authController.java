@@ -19,7 +19,14 @@ public class authController {
 
     @PostMapping("/send-otp")
     public ResponseEntity<ResponseDto<?>> sendOtp(@RequestBody Map<String, String> request) {
-        return authService.sendOtp(request.get("email"));
+        String email = request.get("email");
+        return authService.sendOtp(email, true);
+    }
+
+    @PostMapping("/register/send-otp")
+    public ResponseEntity<ResponseDto<?>> sendRegisterOtp(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        return authService.sendOtp(email, false);
     }
 
     @PostMapping("/register")
