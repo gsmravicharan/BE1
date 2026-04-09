@@ -2,12 +2,14 @@ package SmartAirAndHealthMointoring.demo.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "reports")
 @Data
-public class HealthVital {
+public class HealthVital implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -9,4 +9,6 @@ import java.util.List;
 @Repository
 public interface HealthVitalRepo extends JpaRepository<HealthVital,Integer> {
     List<HealthVital> findByRegisterno(String redgno);
+
+    List<HealthVital> findByDepartment(String dept);
 }
